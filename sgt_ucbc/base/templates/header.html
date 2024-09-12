@@ -1,0 +1,34 @@
+{%block content%}
+{% load static%}
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
+        <div class="col-12 col-md-3 mb-2 mb-md-0 text-center text-md-start">
+            <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+                <img src="{%static 'img/sgt_ucbc_logo.png'%}" class="img-fluid" width="200px" alt="Logo UCBC SGT">
+            </a>
+        </div>
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li>
+                <h5><a href="#" class="nav-link px-2 link-secondary">Accueil</a></h5>
+            </li>
+            <li>
+                <h5><a href="#" class="nav-link px-2">Travaux</a></h5>
+            </li>
+            <li>
+                <h5><a href="#" class="nav-link px-2">A propos</a></h5>
+            </li>
+        </ul>
+
+        <form class="d-flex col-12 col-md-auto justify-content-center mb-2 mb-md-0" role="search">
+            <input class="form-control me-2" type="search" placeholder="Trouver un mémoire" aria-label="Search">
+            <button class="btn btn-outline-primary" type="submit">Rechercher</button>
+        </form>
+
+        <div class="col-12 col-md-3 text-center text-md-end">
+            <button type="button" class="btn btn-success p-2 m-2">Se connecter</button>
+        </div>
+    </header>
+</div>
+<div class="row bg-dark">.</div>
+{%endblock%}

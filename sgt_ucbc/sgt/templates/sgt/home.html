@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}SGT UCBC{% endblock %}
+
+{%block content%}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm p-4 bg-success text-white">
+                <h2 class="">SGT-UCBC</h2>
+                <h6 class="">Système de gestion des travaux et de recommandation basé sur les contenus pour
+                    recommander les
+                    sujets de mémoire aux étudiants finalistes</h6>
+                <p>
+                    C'est une plateforme de dépôt et Archivage Numérique des Travaux de mémoires des Étudiants soutenus
+                    à l'Université Chrétienne Bilingue du Congo
+                    .Elle permet de parcourir et d'accéder au texte intégral de ces travaux si l'auteur et le jury de
+                    soutenance ont autorisé la diffusion en accès libre.
+                </p>
+                <a type="button" class="btn btn-danger shadow-lg p-2 m-2" href="{%url 'proposer_memoire'%}">Proposer
+                    travail de
+                    recherche</a>
+                <a type="button" class="btn btn-info shadow-lg p-2 m-2" href="{%url 'deposer_sujet'%}">Deposer
+                    votre sujet</a>
+
+            </div>
+        </div>
+        <div class="col-md-8">
+            <h3>Voici les mémoires déjà réalisés à UCBC</h3>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <a href="">
+                        <h6 class="card-title">Système de recommandation basé sur les contenus pour recommander les
+                            sujets de mémoire aux étudiants finalistes</h6>
+                    </a>
+                    <p class="card-text"><i class="bi bi-person-circle"></i> Auteur : <strong>Cedric Muteya
+                        </strong>
+                        | <i class="bi bi-bank"></i> L3 Genie info
+                        |
+                        <i class="bi bi-calendar3"></i> Annee Academique : 2024 | <i
+                            class="bi bi-file-earmark-word"></i> Mots
+                        clés :
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}SGT UCBC{% endblock %}
+
+{%block content%}
+<div class="container mt-5">
+    <!-- Première partie : Recherche par résumé -->
+    <div class="row">
+        <div class="col-lg-6 mb-5">
+            <h2 class="mb-3 display-6">Rechercher par Résumé</h2>
+            <form>
+                <div class="mb-3">
+                    <label for="resume" class="form-label">Entrez un résumé, Les systèmes affichera les mémoires
+                        similaires ou presque</label>
+                    <textarea class="form-control" id="resume" rows="4"
+                        placeholder="Entrez le résumé de votre travail ici... "></textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="rechercher()">Rechercher</button>
+            </form>
+            <div id="resultats" class="mt-4">
+                <!-- Résultats de la recherche seront affichés ici -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <a href="">
+                            <h6 class="card-title">Système de recommandation basé sur les contenus pour recommander les
+                                sujets de mémoire aux étudiants finalistes</h6>
+                        </a>
+                        <p class="card-text"><i class="bi bi-person-circle"></i> Auteur : <strong>Cedric Muteya
+                            </strong>
+                            | <i class="bi bi-bank"></i> L3 Genie info
+                            |
+                            <i class="bi bi-calendar3"></i> Annee Academique : 2024 | <i
+                                class="bi bi-file-earmark-word"></i> Mots
+                            clés :
+                        </p>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Deuxième partie : Recommandation de résumé et angle de travail -->
+        <div class="col-lg-6">
+            <h2 class="mb-3">Recommandation de Travail</h2>
+            <form>
+                <div class="mb-3">
+                    <label for="recommandation" class="form-label">Recommandation</label>
+                    <textarea class="form-control" id="recommandation" rows="4"
+                        placeholder="Suggestions de résumé et d'angle de travail..."></textarea>
+                </div>
+                <button type="button" class="btn btn-success" onclick="recommander()">Recommander</button>
+            </form>
+            <div id="suggestions" class="mt-4">
+                <!-- Suggestions seront affichées ici -->
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
