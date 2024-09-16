@@ -10,7 +10,7 @@ urlpatterns = [
     path('', sgt_views.home, name='home'),
     
     #memoire detail
-    path('memoire/', sgt_views.memoire_detail, name='memoire_detail'),
+    path('memoire/<int:memoire_id>/', sgt_views.memoire_detail, name='memoire_detail'),
 
     #proposition de sujet recommandation et recherche de similaires mémoires
     path('propose/', sgt_views.proposer_memoire, name='proposer_memoire'),

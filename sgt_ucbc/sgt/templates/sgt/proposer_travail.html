@@ -9,13 +9,9 @@
         <div class="col-lg-6 mb-5">
             <h2 class="mb-3 display-6">Rechercher par Résumé</h2>
             <form>
-                <div class="mb-3">
-                    <label for="resume" class="form-label">Entrez un résumé, Les systèmes affichera les mémoires
-                        similaires ou presque</label>
-                    <textarea class="form-control" id="resume" rows="4"
-                        placeholder="Entrez le résumé de votre travail ici... "></textarea>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="rechercher()">Rechercher</button>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Rechercher</button>
             </form>
             <div id="resultats" class="mt-4">
                 <!-- Résultats de la recherche seront affichés ici -->
