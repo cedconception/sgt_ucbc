@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}SGT UCBC{% endblock %}
+{% block title %}Ajout d'un mémoire{% endblock %}
 
 {%block content%}
-<div class="container mt-5 d-flex justify-content-center d-inline-flex">
-    <h2 class="text-center mb-4">Soumission de sujet de mémoire</h2>
+<div class="container mt-5 d-flex justify-content-center">
+    <h2 class="text-center mb-4">Ajout d'un mémoire dans la base des donnees</h2>
     <div class="col-md-8 mr-auto">
         <form method=" POST" enctype="multipart/form-data" class="form col-md-6">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Soumettre le sujet</button>
+            <button type="submit" class="btn btn-primary">Ajouter Memoire</button>
         </form>
     </div>
 </div>

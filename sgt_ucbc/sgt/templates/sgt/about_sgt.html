@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About SGT UCBC {% endblock %}
+
+{%block content%}
+<div class="container mt-10">
+    <section class="about-header"></section>
+    <div class="container">
+        <h1 class="display-4">SGT UCBC</h1>
+        <p class="lead">Une solution innovante pour la gestion et la recommandation des travaux de mémoire à l'UCBC</p>
+    </div>
+    </section>
+
+    <!-- About System Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>Notre Système de Gestion des Travaux de Mémoire</h2>
+                    <p>
+                        Notre plateforme a été conçue pour faciliter la gestion, l’analyse, et la recommandation des
+                        travaux
+                        de mémoire à l'Université Chrétienne Bilingue du Congo (UCBC). Elle nous offrons une
+                        solution intuitive, responsive, et sécurisée. Le système permet aux étudiants de soumettre leurs
+                        travaux, aux directeurs de mémoire de suivre les progressions, et à l'administration de gérer
+                        efficacement les documents académiques.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <img src="{%static 'img/sgt_ucbc_logo.png'%}" width="600px" class="img-fluid"
+                        alt="Système de gestion des mémoires">
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <img src="{%static 'img/ucbc.jpg'%}" width="600px" class="img-fluid" alt="Recommandation innovante">
+                </div>
+                <div class="col-md-6">
+                    <h2>Recommandation de Nouveaux Sujets</h2>
+                    <p>
+                        Grâce à l’utilisation de techniques avancées de traitement automatique du langage naturel (NLP)
+                        telles que les sentence-transformers et l'algorithme cosine-similarity, notre système analyse
+                        les
+                        résumés des mémoires soumis pour identifier les similitudes et proposer des sujets de recherche
+                        innovants. Cette fonctionnalité aide à éviter les répétitions et encourage l'innovation
+                        académique à travers la détection de thèmes sous-explorés.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About UCBC Section -->
+    <section class="about-section bg-light m-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h2>À propos de l'Université Chrétienne Bilingue du Congo (UCBC)</h2>
+                    <a target="_blank" href="https://www.ci-ucbc.edu.cd" class="btn btn-danger">Visiter le
+                        site
+                        web</a>
+                    <p>
+                        L'UCBC est une institution universitaire située à Beni, en République Démocratique du Congo,
+                        dédiée
+                        à l'excellence académique, à la formation bilingue et à la promotion de la transformation
+                        communautaire. À travers des programmes innovants comme notre système de gestion des mémoires,
+                        l'UCBC continue de former les leaders de demain dans les domaines des sciences, de la
+                        technologie et
+                        des humanités.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{%endblock%}

@@ -1,9 +1,8 @@
-from datetime import timezone
+from datetime import datetime, timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import RegexValidator
 
-from accounts.models import CustomUser
 
 class Memoire(models.Model):
     auteur = models.CharField(max_length=50, blank=False, default="")
@@ -22,6 +21,8 @@ class Memoire(models.Model):
     ulr_fiichier = models.URLField(blank=True)
     def __str__(self):
         return f"{self.id} - {self.annee_ac} - {self.titre}"
+    def get_absolute_url(self):
+        return "/memoire/" + str(self.titre) + "/"
 
 
 
@@ -46,25 +47,29 @@ class SujetDeposer(models.Model):
         ('corrige', 'Corrigé'),
         ('non_corrige', 'Non Corrigé'),
     ]
-    titre = models.CharField(max_length=255)
-    resume = models.TextField()
-    problematique = models.TextField()
-    methode = models.TextField()
-    plan_prov = models.TextField()  # Plan provisoire
-    bibliograph = models.TextField()  # Bibliographie
-    annee_ac = models.CharField(max_length=10)  # Année académique
-    date_prop = models.DateField()  # Date de proposition
-    date_correct = models.DateField(blank=True, null=True)  # Date de correction
-    status_feu_vert = models.BooleanField(default=False)  # Feu vert pour commencer
-    status_dep = models.CharField(max_length=15, choices=STATUS_DEPOT_CHOICES, default='non_depose')  # Statut du dépôt
-    domaine = models.CharField(max_length=255)  # Domaine de recherche
-    promotion = models.CharField(max_length=255)  # Promotion
-    status_dir = models.CharField(max_length=15, choices=STATUS_CHOICES, default='en_attente')  # Statut directeur
-    status_enc = models.CharField(max_length=15, choices=STATUS_CHOICES, default='en_attente')  # Statut encadreur
+    titre = models.CharField(max_length=255, blank=False)
+    resume = models.TextField(blank=False)
+    problematique = models.TextField(blank=True)
+    methode = models.TextField(blank=True)
+    #plan_prov = models.TextField(blank=True)  # Plan provisoire
+    annee_ac = models.IntegerField(max_length=4,blank=False)  # Année académique
+    date_prop = models.DateField(default=datetime.now())  # Date de proposition
+    #date_correct = models.DateField(blank=True, null=True)  # Date de correction
+    #status_feu_vert = models.BooleanField(default=False)  # Feu vert pour commencer
+    #status_dep = models.CharField(max_length=15, choices=STATUS_DEPOT_CHOICES, default='non_depose')  # Statut du dépôt
+    domaine = models.TextField(blank=True)  # Domaine de recherche
+    #promotion = models.CharField(max_length=255)  # Promotion
+    #status_dir = models.CharField(max_length=15, choices=STATUS_CHOICES, default='en_attente')  # Statut directeur
+    #status_enc = models.CharField(max_length=15, choices=STATUS_CHOICES, default='en_attente')  # Statut encadreur
     #status_lec1 = models.CharField(max_length=15, choices=STATUS_CORRECTION_CHOICES, default='non_corrige')  # Statut lecteur 1
     #status_lec2 = models.CharField(max_length=15, choices=STATUS_CORRECTION_CHOICES, default='non_corrige')  # Statut lecteur 2
     #status_def = models.CharField(max_length=15, choices=STATUS_CHOICES, default='en_attente')  # Statut de la défense
-    correction = models.TextField(blank=True, null=True)  # Corrections proposées   
+    #correction = models.TextField(blank=True, null=True)  # Corrections proposées 
+    def get_absolute_url(self):
+        return "/sujet/" + str(self.titre) + "/"
+
+    def __str__(self):
+        return f"{self.titre}"  
 
 class Etudiant(models.Model):
     GENDER_CHOICES = [
@@ -148,7 +153,6 @@ class Director(models.Model):
         pass
 
 class Encadreur(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     domaine_recherche = models.CharField(max_length=100)
 
     def envoyer_corrections(self, travail, corrections):

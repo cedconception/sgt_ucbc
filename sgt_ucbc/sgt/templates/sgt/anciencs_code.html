@@ -1,0 +1,62 @@
+<div class="col-md-8 mr-auto">
+    <h2 class="text-center mb-4">Soumission de sujet de mémoire</h2>
+
+    <form id="sujetMemoireForm">
+        <!-- Intitulé du sujet -->
+        <div class="mb-3">
+            <label for="intituleSujet" class="form-label">Intitulé du sujet</label>
+            <input type="text" class="form-control" id="intituleSujet" name="intitule"
+                placeholder="Entrez l'intitulé du sujet" required>
+        </div>
+
+        <!-- Résumé -->
+        <div class="mb-3">
+            <label for="resume" class="form-label">Résumé</label>
+            <textarea class="form-control" id="resume" name="resume" rows="4" placeholder="Entrez le résumé du sujet"
+                required></textarea>
+        </div>
+
+        <!-- Problématique -->
+        <div class="mb-3">
+            <label for="problematique" class="form-label">Problématique</label>
+            <textarea class="form-control" id="problematique" name="problematique" rows="4"
+                placeholder="Entrez la problématique" required></textarea>
+        </div>
+
+        <!-- Hypothèses -->
+        <div class="mb-3">
+            <label for="hypotheses" class="form-label">Hypothèses</label>
+            <textarea class="form-control" id="hypotheses" name="hypotheses" rows="4"
+                placeholder="Entrez les hypothèses" required></textarea>
+        </div>
+
+        <!-- Mots clés -->
+        <div class="mb-3">
+            <label for="motsCles" class="form-label">Mots clés</label>
+            <input type="text" class="form-control" id="motsCles" name="motsCles"
+                placeholder="Entrez les mots clés (séparés par des virgules)" required>
+        </div>
+
+        <!-- Proposition du directeur -->
+        <div class="mb-3">
+            <label for="propositionDirecteur" class="form-label">Proposition du directeur</label>
+            <input type="text" class="form-control" id="propositionDirecteur" name="directeur"
+                placeholder="Nom du directeur proposé" required>
+        </div>
+
+        <!-- Proposition de l'encadreur -->
+        <div class="mb-3">
+            <label for="propositionEncadreur" class="form-label">Proposition de l'encadreur</label>
+            <input type="text" class="form-control" id="propositionEncadreur" name="encadreur"
+                placeholder="Nom de l'encadreur proposé" required>
+        </div>
+
+        <!-- Bouton de soumission -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Soumettre le sujet</button>
+        </div>
+    </form>
+</div>
+<div class=" card col-md-3 m-3 bg-success">
+    <h4>Information</h4>
+</div>

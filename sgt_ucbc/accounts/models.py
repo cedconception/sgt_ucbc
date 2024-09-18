@@ -1,39 +1,51 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import User
 
-# les roles des utilisateurs
-USER_ROLES = [
-    ('FAC', 'Faculté'),
-    ('ETU', 'Étudiant'),
-    ('DIR', 'Directeur'),
-    ('ENC', 'Encadreur'),
-    ('ADM', 'Administrateur'),
-]
-class CustomUser(AbstractUser):
-    role = models.CharField(max_length=3, choices=USER_ROLES, default='ETU')
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    # Champs communs à tous les profils
+    full_name = models.CharField(max_length=255, blank=True)
+    bio = models.TextField(max_length=500, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
-    def is_faculty(self):
-        return self.role == 'FAC'
+    # Champs pour indiquer le type de profil
+    role_choices = [
+        ('etudiant', 'Étudiant'),
+        ('directeur', 'Directeur'),
+        ('encadreur', 'Encadreur'),
+        ('faculte', 'Faculté'),
+    ]
+    role = models.CharField(max_length=50, choices=role_choices, default='etudiant')
 
-    def is_student(self):
-        return self.role == 'ETU'
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+    
 
-    def is_director(self):
-        return self.role == 'DIR'
+class EtudiantProfile(Profile):
+    student_id = models.CharField(max_length=50)
+    field_of_study = models.CharField(max_length=100)
+    year_of_study = models.IntegerField()
 
-    def is_administrator(self):
-        return self.role == 'ADM'
+    def __str__(self):
+        return f"Étudiant: {self.user.username}"
+    
+class DirecteurProfile(Profile):
+    department = models.CharField(max_length=100)
+    years_of_experience = models.IntegerField()
 
-    def is_encadreur(self):
-        return self.role == 'ENC'
-    # Redefinir les relations pour éviter les conflits
-    groups = models.ManyToManyField(
-        Group,
-        related_name='customuser_set',
-        blank=True,
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name='customuser_set',
-        blank=True,
-    )
+    def __str__(self):
+        return f"Directeur: {self.user.username}"
+    
+class EncadreurProfile(Profile):
+    specialisation = models.CharField(max_length=100)
+    number_of_students_supervised = models.IntegerField()
+
+    def __str__(self):
+        return f"Encadreur: {self.user.username}"
+
+

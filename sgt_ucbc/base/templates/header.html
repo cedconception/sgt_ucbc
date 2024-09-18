@@ -10,13 +10,13 @@
 
         <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
             <li>
-                <h5><a href="#" class="nav-link px-2 link-secondary">Accueil</a></h5>
+                <h5><a href="{%url 'home'%}" class="nav-link px-2 link-secondary">Accueil</a></h5>
             </li>
             <li>
-                <h5><a href="#" class="nav-link px-2">Travaux</a></h5>
+                <h5><a href="{%url 'home'%}" class="nav-link px-2">Travaux</a></h5>
             </li>
             <li>
-                <h5><a href="#" class="nav-link px-2">A propos</a></h5>
+                <h5><a href="{%url 'about'%}" class="nav-link px-2">A propos</a></h5>
             </li>
         </ul>
 
@@ -24,10 +24,14 @@
             <input class="form-control me-2" type="search" placeholder="Trouver un mémoire" aria-label="Search">
             <button class="btn btn-outline-primary" type="submit">Rechercher</button>
         </form>
-
+        {% if user.is_authenticated %}
+        <h5 class="bg-danger text-white p-2"><strong><i class="bi bi-person-circle"></i> {{user.username}}</strong>
+        </h5>
+        {% else %}
         <div class="col-12 col-md-3 text-center text-md-end">
-            <button type="button" class="btn btn-success p-2 m-2">Se connecter</button>
+            <a type="button" href="{%url 'login'%}" class="btn btn-success p-2 m-2">Se connecter</a>
         </div>
+        {%endif %}
     </header>
 </div>
 <div class="row bg-dark">.</div>
