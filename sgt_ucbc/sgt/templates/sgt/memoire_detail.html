@@ -4,7 +4,7 @@
 
 {%block content%}
 
-<div class="container d-flex flex-wrap align-items-start justify-content-md-between py-3 mb-4 border-top">
+<div class="container d-flex flex-wrap:nowrap align-items-start justify-content-md-between py-3 mb-4 border-top">
 
     <div class="col-md-9 ">
         <!-- Titre et Auteur -->
@@ -12,7 +12,6 @@
             <h2>{{memoire.titre}}</h2>
             <hr>
             <h6><strong>Auteur : </strong>{{memoire.auteur}} ({{memoire.annee_ac}})</h6>
-            <!-- Barre séparatrice -->
             <hr>
         </div>
 
@@ -34,9 +33,21 @@
 
     <div class="card mb-4 shadow-sm p-4 mt-4 bg-success text-white">
         <div>
+            {% if memoire.url_fichier %}
+            {% if memoire.url_fichier.url %}
             <img src="" alt="">
-            <i class=" bi bi-file-earmark-arrow-down"></i>
+            <p>{{ memoire.url_fichier }}</p>
+            <i class="bi bi-file-earmark-arrow-down"></i>
+            <a href="{{ memoire.url_fichier.url }}" class="btn btn-danger">Lire le document</a>
+            {% else %}
+            <img src="" alt="">
+            <p>{{ memoire.url_fichier }}</p>
+            <i class="bi bi-file-earmark-arrow-down"></i>
             <a href="" class="btn btn-danger">Lire le document</a>
+            {% endif %}
+            {% else %}
+            <p>Aucun fichier associé.</p>
+            {% endif %}
         </div>
     </div>
 </div>

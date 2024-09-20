@@ -5,53 +5,39 @@
 {%block content%}
 <div class="container mt-5">
     <!-- Première partie : Recherche par résumé -->
-    <div class="row">
+    <div class="container">
         <div class="col-lg-6 mb-5">
-            <h2 class="mb-3 display-6">Rechercher par Résumé</h2>
-            <form action="">
+            <h2 class="mb-3 display-6">Recommandation des travaux</h2>
+            <form method="POST" class="form-control">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <button type="submit">Recommander</button>
             </form>
-            <div id="resultats" class="mt-4">
-                <!-- Résultats de la recherche seront affichés ici -->
-                <div class="card mb-4 shadow-sm">
-                    {%for memoire in memoires_similaires%}
-                    <div class="card-body">
-                        <a href="">
-                            <h6 class="card-title">{{memoire.titre}}</h6>
-                        </a>
-                        <p class="card-text"><i class="bi bi-person-circle"></i> Auteur : <strong>Cedric Muteya
-                            </strong>
-                            | <i class="bi bi-bank"></i> L3 Genie info
-                            |
-                            <i class="bi bi-calendar3"></i> Annee Academique : 2024 | <i
-                                class="bi bi-file-earmark-word"></i> Mots
-                            clés :
-                        </p>
-
-                    </div>
-                    {%endfor%}
-                </div>
-
-            </div>
         </div>
+    </div>
 
-        <!-- Deuxième partie : Recommandation de résumé et angle de travail -->
-        <div class="col-lg-6">
-            <h2 class="mb-3">Recommandation de Travail</h2>
-            <form>
-                <div class="mb-3">
-                    <label for="recommandation" class="form-label">Recommandation</label>
-                    <textarea class="form-control" id="recommandation" rows="4"
-                        placeholder="Suggestions de résumé et d'angle de travail..."></textarea>
+
+    <div class="col-lg-6 mb-5">
+        <div id="resultats" class="mt-4">
+            <!-- Résultats de la recherche seront affichés ici -->
+            <div class="card mb-4 shadow-sm">
+                {%for memoire in memoires_similaires%}
+                <div class="card-body">
+                    <a href="">
+                        <h6 class="card-title">{{memoire.titre}}</h6>
+                    </a>
+                    <p class="card-text"><i class="bi bi-person-circle"></i> Auteur : <strong>Cedric Muteya
+                        </strong>
+                        | <i class="bi bi-bank"></i> L3 Genie info
+                        |
+                        <i class="bi bi-calendar3"></i> Annee Academique : 2024 | <i
+                            class="bi bi-file-earmark-word"></i> Mots
+                        clés :
+                    </p>
+
                 </div>
-                <button type="button" class="btn btn-success" onclick="recommander()">Recommander</button>
-            </form>
-            <div id="suggestions" class="mt-4">
-                <!-- Suggestions seront affichées ici -->
+                {%endfor%}
             </div>
         </div>
     </div>
-</div>
-{%endblock%}
+    {%endblock%}

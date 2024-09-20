@@ -6,7 +6,7 @@
 <div class="container mt-5 d-flex justify-content-center d-inline-flex">
     <h2 class="text-center mb-4">Soumission de sujet de mémoire</h2>
     <div class="col-md-8 mr-auto">
-        <form method=" POST" enctype="multipart/form-data" class="form col-md-6">
+        <form method="POST" enctype="multipart/form-data" class="form col-md-6">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">Soumettre le sujet</button>

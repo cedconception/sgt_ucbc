@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from sgt import views as sgt_views
 
@@ -20,12 +22,18 @@ urlpatterns = [
     path('memoire/ajouter/', sgt_views.ajouter_memoire, name='ajouter_memoire'),
 
     #proposition de sujet recommandation et recherche de similaires mémoires
-    path('propose/', sgt_views.proposer_memoire, name='proposer_memoire'),
+    path('compare/', sgt_views.compare, name='proposer_memoire'),
 
     #depot de sujet mémoires
     path('sujet/<int:sujet_id>/', sgt_views.sujet_proposer, name='sujet_proposer'),
     path('sujet/deposer_sujet/', sgt_views.deposer_sujet, name='deposer_sujet'),
     
 
+    path('recherche/', sgt_views.rechercher_memoire, name='rechercher_memoire'),
+
+
+    path('dashboard/', sgt_views.dashboard_etudiant, name='dashboard_etudiant'),
     
-]
+] 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

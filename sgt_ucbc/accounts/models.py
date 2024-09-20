@@ -1,51 +1,72 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
-class Profile(models.Model):
+# Faculté Profile
+class FacultyProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    department = models.CharField(max_length=255, verbose_name=_('Department'))
+    faculty_position = models.CharField(max_length=255, verbose_name=_('Position'))
+    faculty_contact_email = models.EmailField(max_length=255, verbose_name=_('Contact Email'))
+
+    def enregistrer_enseignant(self, enseignant):
+        # Logique pour enregistrer un enseignant
+        pass
+
+    def affecter_directeur(self, sujet, directeur):
+        # Logique pour affecter un directeur à un sujet
+        pass
+
+    def consulter_travaux(self, travail):
+        # Logique pour consulter les travaux
+        pass
+    
+    # Faculté specific fields
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+# Étudiant Profile
+class StudentProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    student_id = models.CharField(max_length=255, verbose_name=_('Student ID'))
+    department = models.CharField(max_length=255, verbose_name=_('Department'))
+    supervisor = models.ForeignKey('FacultyProfile', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+# Directeur Profile
+class DirectorProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    faculty = models.ForeignKey(FacultyProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    rank = models.CharField(max_length=255, verbose_name=_('Rank'))
+
+    def envoyer_corrections(self, travail, corrections):
+        # Logique pour envoyer des corrections
+        pass
+
+    def envoyer_message_diffusion(self, message):
+        # Logique pour envoyer des messages de diffusion
+        pass
+    
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+# Encadreur Profile
+class SupervisorProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    director = models.ForeignKey(DirectorProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def envoyer_corrections(self, travail, corrections):
+        # Logique pour envoyer des corrections
+        pass
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+# Administrateur Profile
+class AdminProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
-    # Champs communs à tous les profils
-    full_name = models.CharField(max_length=255, blank=True)
-    bio = models.TextField(max_length=500, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-    address = models.CharField(max_length=255, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
-
-    # Champs pour indiquer le type de profil
-    role_choices = [
-        ('etudiant', 'Étudiant'),
-        ('directeur', 'Directeur'),
-        ('encadreur', 'Encadreur'),
-        ('faculte', 'Faculté'),
-    ]
-    role = models.CharField(max_length=50, choices=role_choices, default='etudiant')
-
     def __str__(self):
-        return f"{self.user.username}'s profile"
-    
-
-class EtudiantProfile(Profile):
-    student_id = models.CharField(max_length=50)
-    field_of_study = models.CharField(max_length=100)
-    year_of_study = models.IntegerField()
-
-    def __str__(self):
-        return f"Étudiant: {self.user.username}"
-    
-class DirecteurProfile(Profile):
-    department = models.CharField(max_length=100)
-    years_of_experience = models.IntegerField()
-
-    def __str__(self):
-        return f"Directeur: {self.user.username}"
-    
-class EncadreurProfile(Profile):
-    specialisation = models.CharField(max_length=100)
-    number_of_students_supervised = models.IntegerField()
-
-    def __str__(self):
-        return f"Encadreur: {self.user.username}"
-
-
+        return f'{self.user.username} Profile'

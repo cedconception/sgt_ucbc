@@ -4,29 +4,15 @@ from .models import Memoire, SujetDeposer, Departement, Faculty, Diffusion, Corr
 class RechercheMemoireForm(forms.Form):
     resume = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Entrez le résumé de votre travail ici...'}), label='Entrez un résumé')
 
-
-
 class MemoireForm(forms.ModelForm):
     class Meta:
         model = Memoire
-        fields = ['auteur', 'titre', 'annee_ac', 'resume', 'abstract', 'Directeur', 'Encadreur', 'key_words', 'ulr_fiichier']
-        widgets = {
-            'auteur': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Auteur'}),
-            'titre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Titre du mémoire'}),
-            'annee_ac': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Année académique'}),
-            'resume': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Résumé', 'rows': 5}),
-            'abstract': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Abstract', 'rows': 5}),
-            'Directeur': forms.Select(attrs={'class': 'form-control'}),
-            'Encadreur': forms.Select(attrs={'class': 'form-control'}),
-            'key_words': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Mots-clés'}),
-            'ulr_fiichier': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Lien du fichier'}),
-        }
-        
+        fields = ['auteur', 'titre', 'annee_ac', 'resume', 'abstract', 'Directeur', 'Encadreur', 'key_words', 'url_fichier']
 
 class SujetDeposerForm(forms.ModelForm):
     class Meta:
         model = SujetDeposer
-        fields = ['titre', 'resume', 'problematique', 'methode', 'annee_ac', 'date_prop', 'domaine']
+        fields = ['titre', 'resume', 'problematique', 'methode', 'annee_ac']
         
     def __init__(self, *args, **kwargs):
         super(SujetDeposerForm, self).__init__(*args, **kwargs)

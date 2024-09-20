@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Étudiant{% endblock %}
+
+{% block content %}
+<div class="container my-5 ">
+    <h2 class="text-center mb-4">Dashboard Étudiant</h2>
+    <button class="btn btn-success ml-auto ">Proposer un autre sujet</button>
+
+    <div class="row">
+        <!-- Section des sujets déposés -->
+        <div class="container">
+            <h4>Vos Sujets Déposés</h4>
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>#</th>
+                        <th class="bg-danger text-white ">Statut</th>
+                        <th>Date Dépôt</th>
+                        <th>Titre</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>forloop.counter</td>
+                        <td>sujet.statut</td>
+                        <td>sujet.depot</td>
+                        <td>Étude et implémentation d’un système de paiement d’électricité via le
+                            mobile money et de rechargement automatique du compteur électrique, cas
+                            de la société ENK</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section des interactions avec le directeur/encadreur -->
+        <div class="container">
+            <h4>Interactions avec le Directeur/Encadreur</h4>
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Interlocuteur</th>
+                        <th>Commentaire</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td> forloop.counter </td>
+                        <td>interaction.interlocuteur</td>
+                        <td>interaction.commentaire</td>
+                        <td>interaction.date</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

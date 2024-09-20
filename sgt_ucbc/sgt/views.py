@@ -1,13 +1,27 @@
+import os
+
+import torch
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
+from django.core.files.storage import default_storage
+import win32com.client as win32
+import pythoncom
+import pickle
 from .forms import MemoireForm, RechercheMemoireForm, SujetDeposerForm
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from django.contrib.auth.decorators import login_required
-from .models import Memoire, SujetDeposer
+from .models import Memoire, SujetDeposer, Interaction
+from django.db.models import Q
 import tensorflow_hub as hub
+import pandas as pd
 #import tensorflow as tf
+from sentence_transformers import SentenceTransformer, util
+import nltk
+from nltk.translate.bleu_score import sentence_bleu
+from rouge_score import rouge_scorer
 
 
 
@@ -30,16 +44,51 @@ def memoire_detail(request, memoire_id):
     }
     return render(request, 'sgt/memoire_detail.html', data)
 
+def convert_word_to_pdf(word_file_path):
+    """Convertir un fichier Word en PDF."""
+    # Initialiser le COM pour Word
+    pythoncom.CoInitialize()
+    # Chemin pour le fichier PDF converti
+    pdf_file_path = word_file_path.replace('.docx', '.pdf')
+    # Ouvrir Word
+    word = win32.Dispatch('Word.Application')
+    word.Visible = False
+    # Ouvrir le document
+    doc = word.Documents.Open(word_file_path)
+    # Convertir en PDF
+    doc.SaveAs(pdf_file_path, FileFormat=17)  # 17 est l'ID pour le format PDF
+    # Fermer le document et l'application Word
+    doc.Close()
+    word.Quit()
+    return pdf_file_path
+
 @login_required
 def ajouter_memoire(request):
     if request.method == "POST":
-        form = MemoireForm(request.POST)
+        form = MemoireForm(request.POST, request.GET)
         if form.is_valid():
+            memoire = form.save(commit=False)
+            uploaded_file = request.FILES['url_fichier']
+
+            # Sauvegarder temporairement le fichier Word uploadé
+            temp_file_path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
+
+            # Convertir le fichier Word en PDF
+            if temp_file_path.endswith('.docx'):
+                pdf_file_path = convert_word_to_pdf(temp_file_path)
+
+                # Ouvrir le fichier PDF pour le stocker dans Django
+                with open(pdf_file_path, 'rb') as pdf_file:
+                    memoire.url_fichier.save(os.path.basename(pdf_file_path), pdf_file)
+
+                # Supprimer les fichiers temporaires après l'upload
+                os.remove(temp_file_path)
+                os.remove(pdf_file_path)
             Memoire = form.save()
             return redirect(Memoire)
-        #else:
-            # Ajoute ceci pour voir les erreurs de validation dans la console
-            #print(form.errors)
+        else:
+            #Ajoute ceci pour voir les erreurs de validation dans la console
+            print(form.errors)
     else:
         form = MemoireForm
     return render(request, 'sgt/ajouter_memoire.html', {'form': form})
@@ -49,34 +98,61 @@ def ajouter_memoire(request):
 # Je charge le modèle USE (Universal Sentence Encoder)
 #embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual/3")
 
-@login_required
 #la page de recherche du sujet de mémoire 
+"""@login_required
 def proposer_memoire(request):
-    form = RechercheMemoireForm()
-    memoires_similaires = []
     if request.method == 'POST':
-        form = RechercheMemoireForm(request.POST, request.GET)
+        form = RechercheMemoireForm(request.POST)
         if form.is_valid():
             resume = form.cleaned_data['resume']
-            
-            # Extraire tous les résumés des mémoires depuis la base de données
+
+            # Chargement du modèle
+            embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual/3")
+
+            # Récupérer les données de la base de données
             memoires = Memoire.objects.all()
-            resumes = [memoire.resume for memoire in memoires]
-            
-            # Ajoute le résumé utilisateur dans la liste des résumés
-            resumes.append(resume)
-            
-            # Génére des vecteurs pour tous les résumés
-            vecteurs = np.embed(resumes).numpy()
-            
-            # Calcul de similarité entre les résumés
-            sim_cos = cosine_similarity([vecteurs[-1]], vecteurs[:-1])
-            indices_cos = np.argsort(-sim_cos[0])[:5]  # On récupère les 5 plus similaires
-            
-            # Extraire les mémoires similaires
-            memoires_similaires = [memoires[i] for i in indices_cos]
-            
-    return render(request, 'sgt/proposer_travail.html', {'form': form, 'memoires_similaires':memoires_similaires} )
+            data = []
+            for memoire in memoires:
+                data.append({
+                    'id': memoire.id,
+                    'titre': memoire.titre,
+                    'auteur': memoire.auteur,
+                    'annee_ac': memoire.annee_ac,
+                    'resume': memoire.resume,
+                    'page_de_garde': memoire.page_de_garde,
+                    'cosinus': memoire.cosinus
+                })
+
+            df = pd.DataFrame(data)
+            df['vecteur'] = df['resume'].apply(lambda x: embed(x).numpy())
+
+            # Calcul de similarités
+            vecteurs = np.array(df['vecteur'].tolist())
+            sim_cos = cosine_similarity(vecteurs)
+            indices_cos = np.argsort(-sim_cos, axis=1)
+
+            df['cosinus'] = [list(indices_cos[i, 1:21]) for i in range(len(indices_cos))]
+
+            # Trouver les mémoires similaires
+            resume_vecteur = embed(resume).numpy()
+            sim_resumes = cosine_similarity([resume_vecteur], vecteurs)[0]
+            indices_sim_resumes = np.argsort(-sim_resumes)
+
+            memoires_similaires = df.iloc[indices_sim_resumes[1:6]]  # Top 5
+
+            return render(request, 'index.html', {
+                'form': form,
+                'resume_select': {
+                    'titre': df.loc[df['resume'] == resume, 'titre'].values[0],
+                    'resume': resume
+                },
+                'memoires_similaires': memoires_similaires.to_dict('records')
+            })
+
+    else:
+        form = RechercheMemoireForm()
+
+    return render(request, 'sgt/proposer_travail.html', {'form': form})"""
 
 #Les sujets deposé
 def sujet_proposer(request, sujet_id):
@@ -92,10 +168,193 @@ def deposer_sujet(request):
         form = SujetDeposerForm(request.POST)
         if form.is_valid():
             SujetDeposer = form.save()
-            return redirect(SujetDeposer)
+            return redirect(home)
         else:
             # Ajoute ceci pour voir les erreurs de validation dans la console
             print(form.errors)
     else:
         form = SujetDeposerForm
     return render(request, 'sgt/deposer_sujet.html', {'form': form})
+
+#recherche de memoire par mots clés
+def rechercher_memoire(request):
+    query = request.GET.get('q')  # Récupère le terme de recherche
+    resultats = Memoire.objects.all()  # Initialiser avec tous les mémoires
+
+    if query:
+        mots_cles = query.split()  # Divise la requête en mots
+        for mot in mots_cles:
+            resultats = resultats.filter(
+                Q(titre__icontains=mot) |
+                #Q(resume__icontains=mot) |
+                Q(key_words__icontains=mot)
+            )
+
+    return render(request, 'sgt/resultats_recherche.html', {'resultats': resultats, 'query': query})
+
+# Dashboard étudiant
+def dashboard_etudiant(request):
+    # Supposons que l'utilisateur actuel est l'étudiant connecté
+    etudiant = request.user
+    
+    # Récupération des sujets déposés par l'étudiant
+    sujets = SujetDeposer.objects.filter(auteur=etudiant)
+    
+    # Récupération des interactions de l'étudiant avec son directeur ou encadreur
+    interactions = Interaction.objects.filter(etudiant=etudiant)
+    
+    context = {
+        'sujets': sujets,
+        'interactions': interactions
+    }
+    return render(request, 'sgt/dashboard_etudiant.html', context)
+
+
+
+# Chargement du modèle (à exécuter une seule fois, typiquement dans ton fichier d'initialisation)
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+nltk.download('punkt')
+
+# Calcul du score BLEU
+def calculate_bleu(reference, hypothesis):
+    reference_tokens = nltk.word_tokenize(reference.lower())  # Tokeniser le texte de référence
+    hypothesis_tokens = nltk.word_tokenize(hypothesis.lower())  # Tokeniser l'hypothèse soumise
+
+    # Le score BLEU est calculé en comparant les n-grams (groupes de mots) entre les deux textes
+    bleu_score = sentence_bleu([reference_tokens], hypothesis_tokens)
+    
+    return bleu_score
+
+# Calcul des scores ROUGE
+def calculate_rouge(reference, hypothesis):
+    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+    
+    # Comparer le résumé soumis avec le résumé de référence
+    scores = scorer.score(reference, hypothesis)
+    
+    # Extraire les scores
+    rouge1 = scores['rouge1'].fmeasure
+    rouge2 = scores['rouge2'].fmeasure
+    rougeL = scores['rougeL'].fmeasure
+    
+    return {
+        'rouge1': rouge1,
+        'rouge2': rouge2,
+        'rougeL': rougeL
+    }
+
+# Ici je charge le modèle et les embeddings
+with open('D:\DOCUMENTS\Mémoire CEDRIC L3 FTSI GI 2023-2024\sgt_ucbc\sgt_ucbc\sgt\model.pkl', 'rb') as f:
+    model = pickle.load(f)
+
+# Charge les embeddings
+embeddings = np.load('D:\DOCUMENTS\Mémoire CEDRIC L3 FTSI GI 2023-2024\sgt_ucbc\sgt_ucbc\sgt\embeddings.pkl', allow_pickle=True)
+
+# Fonction pour comparer les résumés soumis aux résumés dans la base de données
+
+def compare(request):
+    if request.method == 'POST':
+        form = RechercheMemoireForm(request.POST)
+        if form.is_valid():
+            new_resume = form.cleaned_data['resume']  # Utiliser cleaned_data pour plus de sécurité
+
+            # Créer un embedding pour le nouveau résumé
+            new_embedding = model.encode(new_resume, convert_to_tensor=True)
+
+            # Vérifier la forme de new_embedding
+            print(f"Forme de new_embedding avant ajustement: {new_embedding.shape}")
+            if new_embedding.dim() == 1:
+                new_embedding = new_embedding.unsqueeze(0)  # Convertir en [1, D]
+            print(f"Forme de new_embedding après ajustement: {new_embedding.shape}")
+
+            # Obtenez les embeddings existants
+            embedding_values = list(embeddings.values())  # Si embeddings est un dictionnaire
+
+            # Convertir les éléments en tenseurs
+            embedding_tensors = []
+            for value in embedding_values:
+                if isinstance(value, dict):
+                    try:
+                        numeric_values = list(value.values())
+                        flat_values = []
+                        for v in numeric_values:
+                            if isinstance(v, (list, np.ndarray)):
+                                flat_values.extend(v)
+                            elif isinstance(v, (int, float)):
+                                flat_values.append(v)
+                            else:
+                                print(f"Valeur non compatible dans le dictionnaire : {v}")
+                        if flat_values:
+                            tensor = torch.tensor(flat_values, dtype=torch.float32)
+                            embedding_tensors.append(tensor)
+                    except Exception as e:
+                        print(f"Erreur lors de la conversion du dictionnaire : {e}")
+                elif isinstance(value, (list, np.ndarray)):
+                    try:
+                        tensor = torch.tensor(value, dtype=torch.float32)
+                        embedding_tensors.append(tensor)
+                    except Exception as e:
+                        print(f"Erreur lors de la conversion de la liste ou tableau : {e}")
+                elif isinstance(value, torch.Tensor):
+                    embedding_tensors.append(value)
+                else:
+                    print(f"Valeur non compatible ignorée : {value}")
+
+            # Filtrer les tensors pour s'assurer qu'ils sont 1D et de même taille que new_embedding
+            valid_embedding_tensors = []
+            expected_dim = new_embedding.shape[1]  # Dimension D
+            for tensor in embedding_tensors:
+                if tensor.dim() == 1 and tensor.shape[0] == expected_dim:
+                    valid_embedding_tensors.append(tensor)
+                else:
+                    print(f"Tenseur invalide ignoré: shape {tensor.shape}")
+
+            if valid_embedding_tensors:
+                # Empilez les tenseurs en un seul tenseur 2D
+                embedding_tensor = torch.stack(valid_embedding_tensors)
+                print(f"Forme de embedding_tensor après empilement: {embedding_tensor.shape}")
+
+                # Vérifier si embedding_tensor est bien 2D
+                if embedding_tensor.dim() != 2:
+                    print("embedding_tensor n'est pas 2D")
+                    # Optionnel: ajustez la forme si possible
+                    # Embedding tensor devrait déjà être 2D ici
+                    # Sinon, vous devez corriger les données
+
+                # Calculer les similarités cosinus
+                similarities = util.pytorch_cos_sim(new_embedding, embedding_tensor)[0]
+                similarities = similarities.cpu().numpy()
+
+                # Trouver les documents les plus similaires
+                top_indices = np.argsort(-similarities)[:5]
+                similar_works = [memoire for idx, memoire in enumerate(Memoire.objects.all()) if idx in top_indices]
+                similarity_percentages = [similarities[idx] * 100 for idx in top_indices]
+
+                # Evaluation BLEU et ROUGE
+                if similar_works:
+                    reference_resume = similar_works[0].resume
+                    bleu_score = calculate_bleu(reference_resume, new_resume)
+                    rouge_scores = calculate_rouge(reference_resume, new_resume)
+                else:
+                    bleu_score = 0.0
+                    rouge_scores = {'rouge1': 0.0, 'rouge2': 0.0, 'rougeL': 0.0}
+
+                # Préparer les résultats à afficher
+                results = [{
+                    'Auteur': similar_works[i].auteur,
+                    'Titre': similar_works[i].titre,
+                    'Similarity': similarity_percentages[i]
+                } for i in range(len(similar_works))]
+
+                evaluation_results = {
+                    'BLEU Score': bleu_score,
+                    'ROUGE-1': rouge_scores['rouge1'],
+                    'ROUGE-2': rouge_scores['rouge2'],
+                    'ROUGE-L': rouge_scores['rougeL']
+                }
+
+                return render(request, 'results.html', {'cos_results': results, 'evaluation_results': evaluation_results})
+    else:
+        form = RechercheMemoireForm()
+    return render(request, 'sgt/proposer_travail.html', {'form': form})

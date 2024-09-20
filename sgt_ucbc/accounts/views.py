@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import Group
+from .forms import FacultyProfileForm, StudentProfileForm
 
 
 def not_authenticated(user):
@@ -42,3 +43,18 @@ def change_profile(request):
     else:
         form = UserChangeForm(instance=request.user)
     return render(request, 'registration/change_profile.html', { 'form': form })
+    
+
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        if request.user.facultyprofile:
+            form = FacultyProfileForm(request.POST, instance=request.user.facultyprofile)
+        else:
+            form = StudentProfileForm(request.POST, instance=request.user.studentprofile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_view')
+    else:
+        form = FacultyProfileForm(instance=request.user.facultyprofile) if request.user.facultyprofile else StudentProfileForm(instance=request.user.studentprofile)
+    return render(request, 'profileView.html', {'form': form})

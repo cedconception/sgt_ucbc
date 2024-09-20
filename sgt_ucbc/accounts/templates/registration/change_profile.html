@@ -4,7 +4,7 @@
 {% block 'title' %}Edit Profile{% endblock %}
 
 {% block content %}
-<main>
+<main class="p-3 card m-4">
 	<h1>Edit Profile {{ user.username }}</h1>
 
 	<form action="{% url 'accounts:change-profile' %}" method="POST">

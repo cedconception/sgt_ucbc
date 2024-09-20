@@ -28,13 +28,10 @@
 
         <div class="col-md-8">
             <h3>Voici les mémoires déjà réalisés à UCBC</h3>
-
+            {%for memoire in memoires%}
             <div class="card mb-2 shadow-sm">
 
-                {%for memoire in memoires%}
                 <div class="card-body">
-
-
                     <a href="{% url 'memoire_detail' memoire.id %}">
                         <h6 class="card-title"> {{memoire.titre}}</h6>
                     </a>
@@ -47,11 +44,10 @@
                         clés :
                     </p>
                     <hr>
-
                 </div>
-                {%endfor%}
 
             </div>
+            {%endfor%}
         </div>
     </div>
 </div>

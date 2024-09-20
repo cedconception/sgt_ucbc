@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Résultats de la comparaison{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Résultats de la comparaison</h2>
+
+    <h4>Documents similaires</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Auteur</th>
+                <th>Domaine</th>
+                <th>Titre</th>
+                <th>Similarité (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in cos_results %}
+            <tr>
+                <td>{{ result.Auteur }}</td>
+                <td>{{ result.Domaine }}</td>
+                <td>{{ result.Titre }}</td>
+                <td>{{ result.Similarity|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4>Évaluation</h4>
+    <ul>
+        <li><strong>Score BLEU :</strong> {{ evaluation_results.BLEU Score }}</li>
+        <li><strong>ROUGE-1 :</strong> {{ evaluation_results.ROUGE-1 }}</li>
+        <li><strong>ROUGE-2 :</strong> {{ evaluation_results.ROUGE-2 }}</li>
+        <li><strong>ROUGE-L :</strong> {{ evaluation_results.ROUGE-L }}</li>
+    </ul>
+
+    <a href="{% url 'proposer_memoire' %}" class="btn btn-primary">Retour à la comparaison</a>
+</div>
+{% endblock %}

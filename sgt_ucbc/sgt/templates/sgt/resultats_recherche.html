@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Résultats de la recherche{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h3>Résultats de recherche pour : "{{ query }}"</h3>
+
+    {% if resultats %}
+    <ul class="list-group">
+        {% for memoire in resultats %}
+        <li class="list-group-item">
+            <a href="{% url 'memoire_detail' memoire.id %}">
+                <h6>{{ memoire.titre }}</h6>
+            </a>
+            <p><i class="bi bi-person-circle"></i> Auteur : {{ memoire.auteur }} |
+                <i class="bi bi-calendar3"></i> Annee Academique : {{memoire.annee_ac}}
+            </p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Aucun résultat trouvé pour "{{ query }}".</p>
+    {% endif %}
+</div>
+{% endblock %}

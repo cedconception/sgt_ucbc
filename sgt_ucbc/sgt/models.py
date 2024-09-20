@@ -1,32 +1,34 @@
-from datetime import datetime, timezone
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import RegexValidator
+from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class Memoire(models.Model):
-    auteur = models.CharField(max_length=50, blank=False, default="")
-    titre = models.TextField(blank=False)
+    auteur = models.CharField(max_length=50, blank=False)
+    titre = models.TextField(blank=False,)
     # on s'assure que l'annee_ac is in YYYY format
     annee_ac_validator = RegexValidator(r"^\d{4}$", "Academic year must be YYYY format")
-    annee_ac = models.CharField(max_length=10, default="2024", validators=[annee_ac_validator])
+    annee_ac = models.CharField(max_length=4, default="2024", validators=[annee_ac_validator])
     #commentaire = models.TextField()
     #date_depot = models.DateTimeField()
     resume = models.TextField(blank=True)
-    abstract = models.TextField(blank=True) #résumé en anglais
-    Directeur = models.CharField(max_length=50, default="", blank=False)
-    Encadreur = models.CharField(max_length=50, default="", blank=True)
+    abstract = models.TextField(blank=True, default="") #résumé en anglais
+    Directeur = models.CharField(max_length=255, blank=True, default="")
+    Encadreur = models.CharField(max_length=255, blank=True)
     key_words = models.CharField(max_length=255, blank=True)
+    cosinus = models.JSONField(blank=True, null=True) # stocke les indices de simularité
     
-    ulr_fiichier = models.URLField(blank=True)
+    url_fichier = models.FileField(upload_to='uploads/', blank=True)
     def __str__(self):
-        return f"{self.id} - {self.annee_ac} - {self.titre}"
+        return f"- {self.auteur} - {self.titre}"
     def get_absolute_url(self):
         return "/memoire/" + str(self.titre) + "/"
 
 
 
 class SujetDeposer(models.Model):
+    #auteur = models.ForeignKey(User, on_delete=models.CASCADE)
     STATUS_CHOICES = [
         ('en_attente', 'En attente'),
         ('approuve', 'Approuvé'),
@@ -53,7 +55,7 @@ class SujetDeposer(models.Model):
     methode = models.TextField(blank=True)
     #plan_prov = models.TextField(blank=True)  # Plan provisoire
     annee_ac = models.IntegerField(max_length=4,blank=False)  # Année académique
-    date_prop = models.DateField(default=datetime.now())  # Date de proposition
+    date_prop = models.DateField(default=timezone.now)  # Date de proposition
     #date_correct = models.DateField(blank=True, null=True)  # Date de correction
     #status_feu_vert = models.BooleanField(default=False)  # Feu vert pour commencer
     #status_dep = models.CharField(max_length=15, choices=STATUS_DEPOT_CHOICES, default='non_depose')  # Statut du dépôt
@@ -65,11 +67,16 @@ class SujetDeposer(models.Model):
     #status_lec2 = models.CharField(max_length=15, choices=STATUS_CORRECTION_CHOICES, default='non_corrige')  # Statut lecteur 2
     #status_def = models.CharField(max_length=15, choices=STATUS_CHOICES, default='en_attente')  # Statut de la défense
     #correction = models.TextField(blank=True, null=True)  # Corrections proposées 
-    def get_absolute_url(self):
-        return "/sujet/" + str(self.titre) + "/"
+    
 
     def __str__(self):
         return f"{self.titre}"  
+    
+class Interaction(models.Model):
+    etudiant = models.ForeignKey(User, on_delete=models.CASCADE)
+    interlocuteur = models.CharField(max_length=255)  # Le directeur ou encadreur
+    commentaire = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
 
 class Etudiant(models.Model):
     GENDER_CHOICES = [
@@ -117,19 +124,6 @@ class Faculty(models.Model):
     department = models.CharField(max_length=100)
     description = models.TextField()
 
-
-    def enregistrer_enseignant(self, enseignant):
-        # Logique pour enregistrer un enseignant
-        pass
-
-    def affecter_directeur(self, sujet, directeur):
-        # Logique pour affecter un directeur à un sujet
-        pass
-
-    def consulter_travaux(self, travail):
-        # Logique pour consulter les travaux
-        pass
-
 class Diffusion(models.Model):
     message = models.CharField(max_length=255)
     date = models.DateTimeField()
@@ -139,25 +133,7 @@ class Correction_Travail(models.Model):
     commentaire = models.TextField()
     date =  models.DateField()
 
-class Director(models.Model):
 
-
-    domaine_recherche = models.CharField(max_length=100)
-
-    def envoyer_corrections(self, travail, corrections):
-        # Logique pour envoyer des corrections
-        pass
-
-    def envoyer_message_diffusion(self, message):
-        # Logique pour envoyer des messages de diffusion
-        pass
-
-class Encadreur(models.Model):
-    domaine_recherche = models.CharField(max_length=100)
-
-    def envoyer_corrections(self, travail, corrections):
-        # Logique pour envoyer des corrections
-        pass
 
 """class PlagiarismCheck(models.Model):
     travail = models.ForeignKey(on_delete=models.CASCADE)
