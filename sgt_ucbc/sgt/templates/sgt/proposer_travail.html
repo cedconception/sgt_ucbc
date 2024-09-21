@@ -2,11 +2,11 @@
 {% load static %}
 {% block title %}SGT UCBC{% endblock %}
 
-{%block content%}
-<div class="container mt-5">
+{% block content %}
+<div class="container mt-5 d-flex">
     <!-- Première partie : Recherche par résumé -->
-    <div class="container">
-        <div class="col-lg-6 mb-5">
+    <div class=" col-md-6 mb-5">
+        <div class="">
             <h2 class="mb-3 display-6">Recommandation des travaux</h2>
             <form method="POST" class="form-control">
                 {% csrf_token %}
@@ -16,28 +16,30 @@
         </div>
     </div>
 
-
-    <div class="col-lg-6 mb-5">
+    <div class="col-md-6 mb-5">
         <div id="resultats" class="mt-4">
             <!-- Résultats de la recherche seront affichés ici -->
             <div class="card mb-4 shadow-sm">
-                {%for memoire in memoires_similaires%}
+                {% for memoire in memoires_similaires %}
                 <div class="card-body">
                     <a href="">
-                        <h6 class="card-title">{{memoire.titre}}</h6>
+                        <h6 class="card-title">{{ memoire.titre }}</h6>
                     </a>
-                    <p class="card-text"><i class="bi bi-person-circle"></i> Auteur : <strong>Cedric Muteya
-                        </strong>
-                        | <i class="bi bi-bank"></i> L3 Genie info
-                        |
-                        <i class="bi bi-calendar3"></i> Annee Academique : 2024 | <i
-                            class="bi bi-file-earmark-word"></i> Mots
-                        clés :
+                    <p class="card-text"><i class="bi bi-person-circle"></i> Auteur : <strong>{{ memoire.auteur
+                            }}</strong>
+                        | <i class="bi bi-calendar3"></i> Annee Academique : {{ memoire.annee_ac }} | <i
+                            class="bi bi-file-earmark-word"></i> Mots clés :
                     </p>
 
+                    <!-- Affichage des scores BLEU et ROUGE -->
+                    <p class="card-text">
+                        <strong>Score BLEU :</strong> {{ bleu_scores|slice:forloop.counter0 }}<br>
+                        <!-- <strong>Score ROUGE :</strong> {{ rouge_scores|slice:forloop.counter0 }} -->
+                    </p>
                 </div>
-                {%endfor%}
+                {% endfor %}
             </div>
         </div>
     </div>
-    {%endblock%}
+</div>
+{% endblock %}

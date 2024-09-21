@@ -2,7 +2,7 @@ from django import forms
 from .models import Memoire, SujetDeposer, Departement, Faculty, Diffusion, Correction_Travail
 
 class RechercheMemoireForm(forms.Form):
-    resume = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Entrez le résumé de votre travail ici...'}), label='Entrez un résumé')
+    resume = forms.CharField(widget=forms.Textarea(attrs={'rows form-control': 4, 'placeholder': 'Entrez le résumé de travail que vous aimeriez proposer ici...'}), label='Entrez un résumé')
 
 class MemoireForm(forms.ModelForm):
     class Meta:

@@ -23,6 +23,8 @@ import nltk
 from nltk.translate.bleu_score import sentence_bleu
 from rouge_score import rouge_scorer
 
+nltk.download('punkt')
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
 def home(request):
@@ -99,15 +101,15 @@ def ajouter_memoire(request):
 #embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual/3")
 
 #la page de recherche du sujet de mémoire 
-"""@login_required
-def proposer_memoire(request):
+@login_required
+def compare(request):
     if request.method == 'POST':
         form = RechercheMemoireForm(request.POST)
         if form.is_valid():
             resume = form.cleaned_data['resume']
 
-            # Chargement du modèle
-            embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual/3")
+            # Chargement du modèle sentence-transformers
+            model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
             # Récupérer les données de la base de données
             memoires = Memoire.objects.all()
@@ -119,12 +121,11 @@ def proposer_memoire(request):
                     'auteur': memoire.auteur,
                     'annee_ac': memoire.annee_ac,
                     'resume': memoire.resume,
-                    'page_de_garde': memoire.page_de_garde,
                     'cosinus': memoire.cosinus
                 })
 
             df = pd.DataFrame(data)
-            df['vecteur'] = df['resume'].apply(lambda x: embed(x).numpy())
+            df['vecteur'] = df['resume'].apply(lambda x: model.encode(x))  # Générer les embeddings
 
             # Calcul de similarités
             vecteurs = np.array(df['vecteur'].tolist())
@@ -134,25 +135,51 @@ def proposer_memoire(request):
             df['cosinus'] = [list(indices_cos[i, 1:21]) for i in range(len(indices_cos))]
 
             # Trouver les mémoires similaires
-            resume_vecteur = embed(resume).numpy()
+            resume_vecteur = model.encode(resume)  # Générer les embeddings pour le résumé soumis
             sim_resumes = cosine_similarity([resume_vecteur], vecteurs)[0]
             indices_sim_resumes = np.argsort(-sim_resumes)
 
             memoires_similaires = df.iloc[indices_sim_resumes[1:6]]  # Top 5
 
-            return render(request, 'index.html', {
+            # Calcul des scores BLEU et ROUGE
+            bleu_scores = []
+            rouge_scores = []
+            rouge_scorer_instance = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+
+            for i, memoire_similaire in memoires_similaires.iterrows():
+                ref_resume = memoire_similaire['resume']
+
+                # Calcul du score BLEU
+                bleu_score = sentence_bleu([ref_resume.split()], resume.split())
+                bleu_scores.append(bleu_score)
+
+                # Calcul du score ROUGE
+                rouge_score = rouge_scorer_instance.score(resume, ref_resume)
+                rouge_scores.append(rouge_score)
+
+            # Vérification si le résumé soumis existe dans le DataFrame
+            resume_match = df.loc[df['resume'] == resume, 'titre']
+            if not resume_match.empty:
+                titre = resume_match.values[0]
+            else:
+                titre = "Résumé non trouvé"
+
+            # Rendre les scores et les résultats dans le template
+            return render(request, 'sgt/proposer_travail.html', {
                 'form': form,
                 'resume_select': {
-                    'titre': df.loc[df['resume'] == resume, 'titre'].values[0],
+                    'titre': titre,
                     'resume': resume
                 },
-                'memoires_similaires': memoires_similaires.to_dict('records')
+                'memoires_similaires': memoires_similaires.to_dict('records'),
+                'bleu_scores': bleu_scores,
+                'rouge_scores': rouge_scores
             })
 
     else:
         form = RechercheMemoireForm()
 
-    return render(request, 'sgt/proposer_travail.html', {'form': form})"""
+    return render(request, 'sgt/proposer_travail.html', {'form': form})
 
 #Les sujets deposé
 def sujet_proposer(request, sujet_id):
@@ -195,26 +222,26 @@ def rechercher_memoire(request):
 # Dashboard étudiant
 def dashboard_etudiant(request):
     # Supposons que l'utilisateur actuel est l'étudiant connecté
-    etudiant = request.user
+    #etudiant = request.user
     
     # Récupération des sujets déposés par l'étudiant
-    sujets = SujetDeposer.objects.filter(auteur=etudiant)
+    #sujets = SujetDeposer.objects.filter(auteur=etudiant)
     
     # Récupération des interactions de l'étudiant avec son directeur ou encadreur
-    interactions = Interaction.objects.filter(etudiant=etudiant)
+    #interactions = Interaction.objects.filter(etudiant=etudiant)
     
-    context = {
-        'sujets': sujets,
-        'interactions': interactions
-    }
-    return render(request, 'sgt/dashboard_etudiant.html', context)
+    #context = {
+    #    'sujets': sujets,
+    #    'interactions': interactions
+    #}
+    return render(request, 'sgt/dashboard_etudiant.html')
 
 
 
-# Chargement du modèle (à exécuter une seule fois, typiquement dans ton fichier d'initialisation)
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Chargement du modèle (à exécuter une seule fois, typiquement dans  fichier d'initialisation)
 
-nltk.download('punkt')
+
+
 
 # Calcul du score BLEU
 def calculate_bleu(reference, hypothesis):
@@ -252,14 +279,15 @@ with open('D:\DOCUMENTS\Mémoire CEDRIC L3 FTSI GI 2023-2024\sgt_ucbc\sgt_ucbc\s
 embeddings = np.load('D:\DOCUMENTS\Mémoire CEDRIC L3 FTSI GI 2023-2024\sgt_ucbc\sgt_ucbc\sgt\embeddings.pkl', allow_pickle=True)
 
 # Fonction pour comparer les résumés soumis aux résumés dans la base de données
-
+"""
+@login_required
 def compare(request):
     if request.method == 'POST':
         form = RechercheMemoireForm(request.POST)
         if form.is_valid():
-            new_resume = form.cleaned_data['resume']  # Utiliser cleaned_data pour plus de sécurité
+            new_resume = form.cleaned_data['resume']  # cleaned_data pour plus de sécurité
 
-            # Créer un embedding pour le nouveau résumé
+            # embedding pour le nouveau résumé
             new_embedding = model.encode(new_resume, convert_to_tensor=True)
 
             # Vérifier la forme de new_embedding
@@ -276,15 +304,7 @@ def compare(request):
             for value in embedding_values:
                 if isinstance(value, dict):
                     try:
-                        numeric_values = list(value.values())
-                        flat_values = []
-                        for v in numeric_values:
-                            if isinstance(v, (list, np.ndarray)):
-                                flat_values.extend(v)
-                            elif isinstance(v, (int, float)):
-                                flat_values.append(v)
-                            else:
-                                print(f"Valeur non compatible dans le dictionnaire : {v}")
+                        flat_values = [v for sublist in value.values() for v in sublist if isinstance(v, (int, float, list, np.ndarray))]
                         if flat_values:
                             tensor = torch.tensor(flat_values, dtype=torch.float32)
                             embedding_tensors.append(tensor)
@@ -305,8 +325,10 @@ def compare(request):
             valid_embedding_tensors = []
             expected_dim = new_embedding.shape[1]  # Dimension D
             for tensor in embedding_tensors:
-                if tensor.dim() == 1 and tensor.shape[0] == expected_dim:
+                if tensor.dim() == 2 and tensor.shape[1] == expected_dim:
                     valid_embedding_tensors.append(tensor)
+                elif tensor.dim() == 1 and tensor.shape[0] == expected_dim:
+                    valid_embedding_tensors.append(tensor.unsqueeze(0))  # Ajouter une dimension si nécessaire
                 else:
                     print(f"Tenseur invalide ignoré: shape {tensor.shape}")
 
@@ -319,8 +341,6 @@ def compare(request):
                 if embedding_tensor.dim() != 2:
                     print("embedding_tensor n'est pas 2D")
                     # Optionnel: ajustez la forme si possible
-                    # Embedding tensor devrait déjà être 2D ici
-                    # Sinon, vous devez corriger les données
 
                 # Calculer les similarités cosinus
                 similarities = util.pytorch_cos_sim(new_embedding, embedding_tensor)[0]
@@ -357,4 +377,4 @@ def compare(request):
                 return render(request, 'results.html', {'cos_results': results, 'evaluation_results': evaluation_results})
     else:
         form = RechercheMemoireForm()
-    return render(request, 'sgt/proposer_travail.html', {'form': form})
+    return render(request, 'sgt/proposer_travail.html', {'form': form})"""

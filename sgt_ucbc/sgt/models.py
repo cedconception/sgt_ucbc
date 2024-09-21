@@ -54,7 +54,7 @@ class SujetDeposer(models.Model):
     problematique = models.TextField(blank=True)
     methode = models.TextField(blank=True)
     #plan_prov = models.TextField(blank=True)  # Plan provisoire
-    annee_ac = models.IntegerField(max_length=4,blank=False)  # Année académique
+    annee_ac = models.CharField(max_length=4,blank=False)  # Année académique
     date_prop = models.DateField(default=timezone.now)  # Date de proposition
     #date_correct = models.DateField(blank=True, null=True)  # Date de correction
     #status_feu_vert = models.BooleanField(default=False)  # Feu vert pour commencer
@@ -111,18 +111,25 @@ class Etudiant(models.Model):
 class Departement(models.Model):
     nom_depart = models.CharField(max_length=255)
     abrev_depart = models.CharField(max_length=5)
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     def ajouter_departement(self, departement):
         pass
+
+    def __str__(self):
+        return f"{self.nom_depart}"
 
 class Faculty(models.Model):
     ABREV_FACULTE = [
         ('FSTI', 'Faculté de Technologie et Sciences de l Ingénieur'),
         ('FSEG', 'Faculté des Sciences Economiques et de Gestion'),
     ]
+    nom_fac=models.CharField(max_length=255, default="")
     department = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True)
+    def __str__(self):
+        return f"{self.nom_fac}"
+    
 
 class Diffusion(models.Model):
     message = models.CharField(max_length=255)
